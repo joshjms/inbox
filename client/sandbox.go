@@ -63,7 +63,7 @@ func (s *Sandbox) RunContainer() error {
 
 	resp, err := s.Client.ContainerCreate(ctx,
 		&container.Config{
-			Image:        "busybox:stable-uclibc",
+			Image:        "busybox:latest",
 			Cmd:          []string{"bin/sh"},
 			User:         "1000",
 			Tty:          true,

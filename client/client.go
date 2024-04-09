@@ -45,7 +45,7 @@ func NewClient() (*DockerClient, error) {
 func (cli DockerClient) Pull() error {
 	ctx := context.Background()
 
-	reader, err := cli.ImagePull(ctx, "busybox:stable-uclibc", image.PullOptions{})
+	reader, err := cli.ImagePull(ctx, "busybox:latest", image.PullOptions{})
 	if err != nil {
 		return err
 	}
