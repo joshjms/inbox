@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/pkg/stdcopy"
@@ -65,7 +64,11 @@ func (s *Sandbox) RunContainer() error {
 	resp, err := s.Client.ContainerCreate(ctx,
 		&container.Config{
 			Image:        "busybox:latest",
+			Cmd:          []string{"bin/sh"},
+			Tty:          true,
+			AttachStdin:  true,
 			AttachStdout: true,
+			AttachStderr: true,
 		},
 		&container.HostConfig{
 			Mounts: []mount.Mount{
@@ -88,33 +91,6 @@ func (s *Sandbox) RunContainer() error {
 	if err := s.Client.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
 		return utils.HandleError(err)
 	}
-
-	// Run command
-	exec, err := s.Client.ContainerExecCreate(ctx, resp.ID, types.ExecConfig{
-		Cmd: []string{"chmod", "+x", "/app/app"},
-	})
-
-	if err != nil {
-		return utils.HandleError(err)
-	}
-
-	if err := s.Client.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
-		return utils.HandleError(err)
-	}
-
-	exec, err = s.Client.ContainerExecCreate(ctx, resp.ID, types.ExecConfig{
-		Cmd: []string{"/app/app"},
-	})
-
-	if err != nil {
-		return utils.HandleError(err)
-	}
-
-	if err := s.Client.ContainerExecStart(ctx, exec.ID, types.ExecStartCheck{}); err != nil {
-		return utils.HandleError(err)
-	}
-
-	fmt.Println("waiting")
 
 	statusCh, errCh := s.Client.ContainerWait(ctx, resp.ID, container.WaitConditionNotRunning)
 	select {
