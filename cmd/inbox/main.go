@@ -6,6 +6,7 @@ import (
 	"os"
 
 	docker "github.com/joshjms/inbox/client"
+	"github.com/joshjms/inbox/utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -17,7 +18,14 @@ func main() {
 	app.Usage = "Running executables in a container"
 	app.Commands = []*cli.Command{
 		{
-			Name: "run",
+			Name:        "run",
+			Description: "Run an executable in a container",
+			Flags: []cli.Flag{
+				&cli.BoolFlag{
+					Name:  "pull",
+					Usage: "Pull the image before running",
+				},
+			},
 			Action: func(c *cli.Context) error {
 				if c.NArg() == 0 {
 					fmt.Println("Specify a file to run (e.g. app.exe)")
@@ -25,8 +33,9 @@ func main() {
 					return nil
 				}
 				p := c.Args().Get(0)
-				err := docker.Run(p)
-				return err
+				withPull := c.Bool("pull")
+				err := docker.Run(p, withPull)
+				return utils.HandleError(err)
 			},
 		},
 	}
