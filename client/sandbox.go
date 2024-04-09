@@ -63,15 +63,19 @@ func (s *Sandbox) RunContainer() error {
 
 	resp, err := s.Client.ContainerCreate(ctx,
 		&container.Config{
-			Image: "busybox:stable-uclibc",
-			Cmd:   []string{"/app/./app", "<", "/app/stdin.txt", ">", "/app/stdout.txt", "2>", "/app/stderr.txt"},
-			User:  "1000",
+			Image:        "busybox:stable-uclibc",
+			Cmd:          []string{"bin/sh"},
+			User:         "1000",
+			Tty:          true,
+			AttachStdin:  true,
+			AttachStdout: true,
+			AttachStderr: true,
 		},
 		&container.HostConfig{
 			Mounts: []mount.Mount{
 				{
 					Type:   mount.TypeBind,
-					Source: filepath.Join("D:\\inbox\\tests", s.ID),
+					Source: filepath.Join(os.Getenv("MOUNT_DIR"), s.ID),
 					Target: "/app",
 				},
 			},
