@@ -63,12 +63,8 @@ func (s *Sandbox) RunContainer() error {
 
 	resp, err := s.Client.ContainerCreate(ctx,
 		&container.Config{
-			Image:        "busybox:latest",
-			Cmd:          []string{"bin/sh"},
-			Tty:          true,
-			AttachStdin:  true,
-			AttachStdout: true,
-			AttachStderr: true,
+			Image: "busybox:latest",
+			Cmd:   []string{"bin/sh", "-c", "chmod +x /app/app && sync && /app/app"},
 		},
 		&container.HostConfig{
 			Mounts: []mount.Mount{
