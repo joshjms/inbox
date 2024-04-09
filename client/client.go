@@ -10,16 +10,40 @@ import (
 	"github.com/docker/docker/client"
 )
 
-func Run(dir string) error {
-	fmt.Println("Running at", dir)
+type DockerClient struct {
+	*client.Client
+}
 
-	ctx := context.Background()
-
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+func Run(dir string, withPull bool) error {
+	client, err := NewClient()
 	if err != nil {
 		return err
 	}
-	defer cli.Close()
+
+	if withPull {
+		if err := client.Pull(); err != nil {
+			return err
+		}
+	}
+
+	sandbox := NewSandbox(dir, client)
+	fmt.Println(sandbox.ID)
+
+	sandbox.Run()
+
+	return nil
+}
+
+func NewClient() (*DockerClient, error) {
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		return nil, err
+	}
+	return &DockerClient{cli}, nil
+}
+
+func (cli DockerClient) Pull() error {
+	ctx := context.Background()
 
 	reader, err := cli.ImagePull(ctx, "busybox:stable-uclibc", image.PullOptions{})
 	if err != nil {
