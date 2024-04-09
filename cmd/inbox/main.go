@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
 	docker "github.com/joshjms/inbox/client"
 	"github.com/joshjms/inbox/utils"
 	"github.com/urfave/cli/v2"
@@ -14,11 +13,11 @@ import (
 func main() {
 	// inbox run --dir=/path/to/dir
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-		return
-	}
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Fatal("Error loading .env file")
+	// 	return
+	// }
 
 	app := cli.NewApp()
 	app.Name = "inbox"
