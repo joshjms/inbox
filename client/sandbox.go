@@ -75,7 +75,7 @@ func (s *Sandbox) RunContainer() error {
 			Mounts: []mount.Mount{
 				{
 					Type:   mount.TypeBind,
-					Source: filepath.Join(os.Getenv("MOUNT_DIR"), s.ID),
+					Source: filepath.Join(os.Getenv("MOUNTS_DIR"), s.ID),
 					Target: "/app",
 				},
 			},
