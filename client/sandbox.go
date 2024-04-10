@@ -51,9 +51,9 @@ func (s *Sandbox) Init() error {
 		return err
 	}
 
+	os.Chmod(filepath.Join(s.ID, "app"), 0755)
+
 	os.Create(filepath.Join(s.ID, "stdin.txt"))
-	os.Create(filepath.Join(s.ID, "stdout.txt"))
-	os.Create(filepath.Join(s.ID, "stderr.txt"))
 
 	return nil
 }
@@ -64,14 +64,15 @@ func (s *Sandbox) RunContainer() error {
 	resp, err := s.Client.ContainerCreate(ctx,
 		&container.Config{
 			Image: "busybox:latest",
-			Cmd:   []string{"bin/sh", "-c", "chmod +x /app/app && sync && /app/app"},
+			Cmd:   []string{"bin/sh", "-c", "cp /app/app p && cp /app/stdin.txt . && touch stdout.txt && touch stderr.txt && ./p > stdout.txt 2> stderr.txt < stdin.txt && cp stdout.txt /app/stdout.txt && cp stderr.txt /app/stderr.txt"},
 		},
 		&container.HostConfig{
 			Mounts: []mount.Mount{
 				{
-					Type:   mount.TypeBind,
-					Source: filepath.Join(os.Getenv("MOUNTS_DIR"), s.ID),
-					Target: "/app",
+					Type:     mount.TypeBind,
+					Source:   filepath.Join(os.Getenv("MOUNTS_DIR"), s.ID),
+					Target:   "/app",
+					ReadOnly: false,
 				},
 			},
 		},
@@ -96,8 +97,6 @@ func (s *Sandbox) RunContainer() error {
 		}
 	case <-statusCh:
 	}
-
-	fmt.Println("done")
 
 	out, err := s.Client.ContainerLogs(ctx, resp.ID, container.LogsOptions{ShowStdout: true, ShowStderr: true})
 	if err != nil {
