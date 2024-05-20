@@ -75,6 +75,7 @@ func (s *Sandbox) RunContainer() error {
 					ReadOnly: false,
 				},
 			},
+			NetworkMode: "bridge",
 		},
 		nil,
 		nil,
